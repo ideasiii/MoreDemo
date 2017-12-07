@@ -1,8 +1,10 @@
 package iii.ideas.moredemo;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Jugo server connect
     private SemanticWordCMPHandler mSemanticWordCMPHandler = null;
     
+    private PowerManager.WakeLock mWakeLock = null;
     private Handler mHandler = new Handler()
     {
         @Override
@@ -140,6 +143,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
+        mWakeLock.acquire();
+        
         ArrayList<String> permissions = new ArrayList<>();
         
         permissions.add(Manifest.permission.RECORD_AUDIO);
@@ -158,6 +166,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             mLogicHandler.killAll();
         }
+        mWakeLock.release();
+        
         super.onDestroy();
     }
     
@@ -200,6 +210,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         
         ConstraintLayout mConstraintLayout = (ConstraintLayout) findViewById(R.id.main_layout);
         mConstraintLayout.setOnClickListener(this);
+    }
+    
+    @Override
+    protected void onStop()
+    {
+        finish();
+        super.onStop();
     }
     
     @Override
